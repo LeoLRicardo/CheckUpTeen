@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Missão: Conexão Saúde</title>
+    <title>Check-Up Teen</title>
     
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    
     <link rel="stylesheet" href="style.css">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,7 +16,21 @@
     <div class="stars-bg" id="stars-bg"></div>
     <div id="achievement-toast"></div>
 
-    <div id="intro-screen" class="screen active">
+    <div id="logo-splash-screen" class="screen active">
+        <video id="splash-video" src="assets/videos/logo-prefeitura.mp4" autoplay muted playsinline>
+            Seu navegador não suporta a tag de vídeo.
+        </video>
+    </div>
+
+    <div id="title-screen" class="screen">
+        <div class="title-container">
+            <h1 class="game-title" data-text="Check-Up Teen">Check-Up Teen</h1>
+            <p class="game-subtitle">Combatendo a desinformação</p>
+            <button id="enter-game-btn">Entrar</button>
+        </div>
+    </div>
+
+    <div id="intro-screen" class="screen">
         <div class="glass-card intro-card">
             <h1 class="glitch-title" data-text="BRIEFING DE MISSÃO">BRIEFING DE MISSÃO</h1>
             <div id="briefing-container" class="briefing-container"></div>
@@ -29,7 +42,7 @@
 
     <div id="onboarding-screen" class="screen">
         <div class="onboarding-container">
-            <div class="intro-button-container">
+             <div class="intro-button-container">
                 <button id="back-to-briefing-btn" class="secondary" style="margin-bottom: 20px;">Voltar ao Briefing</button>
             </div>
             <h1 class="glitch-title" data-text="Escolha seu Agente">Escolha seu Agente</h1>
@@ -109,7 +122,7 @@
     <div id="final-scanner-screen" class="screen">
         <div class="glass-card scanner-card">
             <h2 class="scanner-title">REGISTRO FINAL</h2>
-            <p>Aponte a câmera para o QR Code fornecido pelo ministrador para registrar sua missão no formulário.</p>
+            <p>Aponte para o QR Code fornecido pelo ministrador para registrar sua missão no formulário.</p>
             <div id="final-qr-reader"></div>
             <p id="final-scanner-message"></p>
             <div class="scanner-button-container">

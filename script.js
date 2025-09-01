@@ -204,35 +204,30 @@ function showTutorialStep(stepIndex) {
     navigateTo(step.screen);
 
     // Espera um pouco para a animação da tela terminar antes de mostrar o tutorial
-    setTimeout(() => {
-        $('#tutorial-title').textContent = step.title;
-        $('#tutorial-text').textContent = step.text;
-        $('#tutorial-next-btn').textContent = (stepIndex === TUTORIAL_STEPS.length - 1) ? "Finalizar" : "Próximo";
+    // Dentro da função showTutorialStep
+setTimeout(() => {
+    // Define o conteúdo do modal
+    $('#tutorial-title').textContent = step.title;
+    $('#tutorial-text').textContent = step.text;
+    $('#tutorial-next-btn').textContent = (stepIndex === TUTORIAL_STEPS.length - 1) ? "Finalizar" : "Próximo";
 
-        if (step.highlightElement) {
-            const elementToHighlight = $(step.highlightElement);
-            if (elementToHighlight) {
-                currentHighlight = elementToHighlight;
-                elementToHighlight.classList.add('tutorial-highlight');
-                
-                const rect = elementToHighlight.getBoundingClientRect();
-                if (rect.top > window.innerHeight / 2) {
-                    tutorialModal.style.top = `${rect.top - 20}px`;
-                    tutorialModal.style.transform = 'translate(-50%, -100%)';
-                } else {
-                    tutorialModal.style.top = `${rect.bottom + 20}px`;
-                    tutorialModal.style.transform = 'translate(-50%, 0)';
-                }
-            }
-        } else {
-            tutorialModal.style.top = '50%';
-            tutorialModal.style.transform = 'translate(-50%, -50%)';
+    // Força o modal a aparecer no centro da tela, ignorando o posicionamento complexo
+    tutorialModal.style.top = '50%';
+    tutorialModal.style.transform = 'translate(-50%, -50%)';
+
+    // Adiciona o destaque se houver um elemento para destacar
+    if (step.highlightElement) {
+        const elementToHighlight = $(step.highlightElement);
+        if (elementToHighlight) {
+            currentHighlight = elementToHighlight;
+            elementToHighlight.classList.add('tutorial-highlight');
         }
+    }
 
-        tutorialOverlay.style.display = 'block';
-        tutorialModal.style.display = 'block';
-    }, 400); // Aumentamos o tempo de espera para 400ms para maior estabilidade
-}
+    // Mostra o fundo escuro e o modal
+    tutorialOverlay.style.display = 'block';
+    tutorialModal.style.display = 'block';
+}, 400);
 
 // --- Controle manual do tutorial (apenas uma vez, fora das funções) ---
 document.addEventListener("DOMContentLoaded", () => {

@@ -234,6 +234,14 @@ function showTutorialStep(stepIndex) {
     }, 400); // Aumentamos o tempo de espera para 400ms para maior estabilidade
 }
 
+// --- Controle manual do tutorial (apenas uma vez, fora das funções) ---
+document.addEventListener("DOMContentLoaded", () => {
+    $('#tutorial-next-btn').addEventListener('click', () => {
+        gameState.tutorial.step++;
+        showTutorialStep(gameState.tutorial.step);
+    });
+});
+
 
 // --- LÓGICA DE MONTAGEM DAS TELAS ---
 function setupIntro() {

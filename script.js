@@ -1101,7 +1101,3 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
-$('#tutorial-next-btn').addEventListener('click', () => {
-    gameState.tutorial.step++;
-    showTutorialStep(gameState.tutorial.step);
-});

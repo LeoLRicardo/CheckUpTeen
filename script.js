@@ -1034,7 +1034,6 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         'accept-mission-btn': () => {
             // Se o tutorial não estiver completo, o botão não faz nada sozinho.
-            if (!gameState.tutorial.completed) return;
             setupOnboarding();
             navigateTo('onboarding-screen');
         },

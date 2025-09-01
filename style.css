@@ -541,3 +541,7 @@ button.secondary {
     #minigame-screen .minigame-title { font-size: 1.5rem; }
     #minigame-screen .minigame-instructions { font-size: 1rem; }
 }
+#tutorial-modal {
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+}

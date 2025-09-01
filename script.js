@@ -1033,15 +1033,22 @@ document.addEventListener('DOMContentLoaded', () => {
             showTutorialStep(gameState.tutorial.step);
         },
         'accept-mission-btn': () => {
+    console.log("Botão 'Iniciar Missão' clicado."); // Passo 1: Confirma que o clique foi registrado.
+
+    // Primeiro, preparamos e navegamos para a próxima tela.
     setupOnboarding();
     navigateTo('onboarding-screen');
 
-    // Se o tutorial ainda não foi completado, esta é a hora de começar!
+    // Agora, verificamos se o tutorial precisa ser iniciado.
     if (!gameState.tutorial.completed) {
-        // Adicionamos um pequeno delay para a animação da tela terminar
+        console.log("Tutorial não está completo. Iniciando a exibição..."); // Passo 2: Confirma que a condição foi atendida.
+
+        // Usamos um pequeno atraso para garantir que a animação da tela
+        // não interfira com o aparecimento do modal do tutorial.
         setTimeout(() => {
-            showTutorialStep(gameState.tutorial.step); // Inicia o tutorial na etapa 0
-        }, 400); // 400ms é um bom tempo de espera
+            console.log("Mostrando a etapa 0 do tutorial."); // Passo 3: Confirma a chamada da função.
+            showTutorialStep(gameState.tutorial.step); // Efetivamente mostra o tutorial.
+        }, 500); // 500 milissegundos de atraso.
     }
 },
         'start-mission-btn': () => {

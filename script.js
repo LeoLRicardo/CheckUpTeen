@@ -159,7 +159,10 @@ function startTutorial() {
         return;
     }
     gameState.tutorial.step = 0;
-    showTutorialStep(gameState.tutorial.step);
+    // O tutorial agora começa na tela de briefing
+    setupIntro();
+    navigateTo('intro-screen');
+    // A primeira dica aparecerá quando o jogador aceitar a missão
 }
 
 function endTutorial() {
@@ -186,23 +189,27 @@ function showTutorialStep(stepIndex) {
 
     const step = TUTORIAL_STEPS[stepIndex];
     
-    if(step.screen === 'onboarding-screen' && !$('#character-selection').innerHTML) {
+    // Prepara a tela necessária para o passo do tutorial ANTES de navegar
+    if (step.screen === 'onboarding-screen' && !$('#character-selection').innerHTML) {
         setupOnboarding();
     }
-    if(step.screen === 'hub-screen' && !$('#hub-grid').innerHTML) {
-        if(!gameState.player) gameState.player = CHARACTERS.ju; 
+    if (step.screen === 'hub-screen' && !$('#hub-grid').innerHTML) {
+        if (!gameState.player) {
+            // Se o jogador não escolheu um personagem durante o tutorial, selecionamos um padrão
+            gameState.player = CHARACTERS.ju; 
+        }
         setupHub();
     }
     
     navigateTo(step.screen);
 
-    $('#tutorial-title').textContent = step.title;
-    $('#tutorial-text').textContent = step.text;
-    $('#tutorial-next-btn').textContent = (stepIndex === TUTORIAL_STEPS.length - 1) ? "Finalizar" : "Próximo";
+    // Espera um pouco para a animação da tela terminar antes de mostrar o tutorial
+    setTimeout(() => {
+        $('#tutorial-title').textContent = step.title;
+        $('#tutorial-text').textContent = step.text;
+        $('#tutorial-next-btn').textContent = (stepIndex === TUTORIAL_STEPS.length - 1) ? "Finalizar" : "Próximo";
 
-    if (step.highlightElement) {
-        // Pequeno delay para garantir que a transição de tela terminou
-        setTimeout(() => {
+        if (step.highlightElement) {
             const elementToHighlight = $(step.highlightElement);
             if (elementToHighlight) {
                 currentHighlight = elementToHighlight;
@@ -217,14 +224,14 @@ function showTutorialStep(stepIndex) {
                     tutorialModal.style.transform = 'translate(-50%, 0)';
                 }
             }
-        }, 100);
-    } else {
-        tutorialModal.style.top = '50%';
-        tutorialModal.style.transform = 'translate(-50%, -50%)';
-    }
+        } else {
+            tutorialModal.style.top = '50%';
+            tutorialModal.style.transform = 'translate(-50%, -50%)';
+        }
 
-    tutorialOverlay.style.display = 'block';
-    tutorialModal.style.display = 'block';
+        tutorialOverlay.style.display = 'block';
+        tutorialModal.style.display = 'block';
+    }, 400); // Aumentamos o tempo de espera para 400ms para maior estabilidade
 }
 
 
@@ -1018,10 +1025,14 @@ document.addEventListener('DOMContentLoaded', () => {
             showTutorialStep(gameState.tutorial.step);
         },
         'accept-mission-btn': () => {
+            // Se o tutorial não estiver completo, o botão não faz nada sozinho.
+            if (!gameState.tutorial.completed) return;
             setupOnboarding();
             navigateTo('onboarding-screen');
         },
         'start-mission-btn': () => {
+            // Se o tutorial não estiver completo, o botão não faz nada sozinho.
+            if (!gameState.tutorial.completed) return;
             if (!gameState.player) {
                 const btn = $('#start-mission-btn');
                 btn.style.borderColor = "var(--color-accent2-glow)";
@@ -1032,13 +1043,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 1500);
                 return;
             }
-            if (!gameState.tutorial.completed) {
-                 gameState.tutorial.step++;
-                 showTutorialStep(gameState.tutorial.step);
-            } else {
-                setupHub();
-                navigateTo('hub-screen');
-            }
+            setupHub();
+            navigateTo('hub-screen');
         },
         'back-to-briefing-btn': () => navigateTo('intro-screen'),
         'scanner-back-btn': () => {

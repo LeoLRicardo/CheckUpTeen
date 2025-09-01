@@ -1033,10 +1033,17 @@ document.addEventListener('DOMContentLoaded', () => {
             showTutorialStep(gameState.tutorial.step);
         },
         'accept-mission-btn': () => {
-            // Se o tutorial não estiver completo, o botão não faz nada sozinho.
-            setupOnboarding();
-            navigateTo('onboarding-screen');
-        },
+    setupOnboarding();
+    navigateTo('onboarding-screen');
+
+    // Se o tutorial ainda não foi completado, esta é a hora de começar!
+    if (!gameState.tutorial.completed) {
+        // Adicionamos um pequeno delay para a animação da tela terminar
+        setTimeout(() => {
+            showTutorialStep(gameState.tutorial.step); // Inicia o tutorial na etapa 0
+        }, 400); // 400ms é um bom tempo de espera
+    }
+},
         'start-mission-btn': () => {
             // Se o tutorial não estiver completo, o botão não faz nada sozinho.
             if (!gameState.tutorial.completed) return;

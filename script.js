@@ -70,11 +70,53 @@ let gameState = {
     achievements: JSON.parse(JSON.stringify(ACHIEVEMENTS)),
     completionCount: { mental: 0, sexual: 0, bucal: 0, nutricao: 0, adolescencia: 0 },
     stationToUnlock: null,
-    triesThisStation: 0
+    triesThisStation: 0,
+    tutorial: {
+        step: 0,
+        completed: false
+    }
 };
 let activeGameIntervals = [];
-let html5QrCode; // Variável global para o scanner
+let html5QrCode;
 
+const TUTORIAL_STEPS = [
+    {
+        screen: 'onboarding-screen',
+        title: 'Bem-vindo, Agente!',
+        text: 'Sua primeira tarefa é escolher um avatar. Cada um possui Atributos diferentes, como Força e Inteligência.',
+        highlightElement: '#character-selection'
+    },
+    {
+        screen: 'onboarding-screen',
+        title: 'Atributos Importam',
+        text: "Um nível alto em 'Força', por exemplo, trará vantagens em certos desafios físicos, enquanto 'Inteligência' ajudará em outros que exigem lógica. Sua escolha impacta a jogabilidade!",
+        highlightElement: '.attributes'
+    },
+    {
+        screen: 'hub-screen',
+        title: 'Base de Operações',
+        text: 'Esta é sua base de operações. Complete todas as missões para restaurar a Conexão Saúde.',
+        highlightElement: null
+    },
+    {
+        screen: 'hub-screen',
+        title: 'Acesso às Estações',
+        text: 'Para desbloquear cada uma dessas portas, você precisará encontrar e escanear o QR Code físico correspondente com a câmera do seu celular.',
+        highlightElement: '#hub-grid'
+    },
+    {
+        screen: 'hub-screen',
+        title: 'Seu Passe de Agente',
+        text: 'Este é o seu Passe de Agente. Clique aqui a qualquer momento para ver seu progresso, selos e as Conquistas desbloqueadas. Explore tudo para se tornar um agente lendário!',
+        highlightElement: '#hub-overlay'
+    },
+    {
+        screen: 'hub-screen',
+        title: 'Missão Aceita',
+        text: 'O resto é com você, Agente. Boa sorte!',
+        highlightElement: null
+    }
+];
 
 // --- FUNÇÕES AUXILIARES E DE NAVEGAÇÃO ---
 const $ = (selector) => document.querySelector(selector);
@@ -105,6 +147,87 @@ function createPixelAvatar(character, container) {
     }
 }
     
+// --- SISTEMA DE TUTORIAL ---
+const tutorialModal = $('#tutorial-modal');
+const tutorialOverlay = $('#tutorial-overlay');
+let currentHighlight = null;
+
+function startTutorial() {
+    if (gameState.tutorial.completed) {
+        setupIntro();
+        navigateTo('intro-screen');
+        return;
+    }
+    gameState.tutorial.step = 0;
+    showTutorialStep(gameState.tutorial.step);
+}
+
+function endTutorial() {
+    tutorialModal.style.display = 'none';
+    tutorialOverlay.style.display = 'none';
+    if (currentHighlight) {
+        currentHighlight.classList.remove('tutorial-highlight');
+        currentHighlight = null;
+    }
+    gameState.tutorial.completed = true;
+    localStorage.setItem('tutorialCompleted', 'true');
+}
+
+function showTutorialStep(stepIndex) {
+    if (currentHighlight) {
+        currentHighlight.classList.remove('tutorial-highlight');
+        currentHighlight = null;
+    }
+
+    if (stepIndex >= TUTORIAL_STEPS.length) {
+        endTutorial();
+        return;
+    }
+
+    const step = TUTORIAL_STEPS[stepIndex];
+    
+    if(step.screen === 'onboarding-screen' && !$('#character-selection').innerHTML) {
+        setupOnboarding();
+    }
+    if(step.screen === 'hub-screen' && !$('#hub-grid').innerHTML) {
+        if(!gameState.player) gameState.player = CHARACTERS.ju; 
+        setupHub();
+    }
+    
+    navigateTo(step.screen);
+
+    $('#tutorial-title').textContent = step.title;
+    $('#tutorial-text').textContent = step.text;
+    $('#tutorial-next-btn').textContent = (stepIndex === TUTORIAL_STEPS.length - 1) ? "Finalizar" : "Próximo";
+
+    if (step.highlightElement) {
+        // Pequeno delay para garantir que a transição de tela terminou
+        setTimeout(() => {
+            const elementToHighlight = $(step.highlightElement);
+            if (elementToHighlight) {
+                currentHighlight = elementToHighlight;
+                elementToHighlight.classList.add('tutorial-highlight');
+                
+                const rect = elementToHighlight.getBoundingClientRect();
+                if (rect.top > window.innerHeight / 2) {
+                    tutorialModal.style.top = `${rect.top - 20}px`;
+                    tutorialModal.style.transform = 'translate(-50%, -100%)';
+                } else {
+                    tutorialModal.style.top = `${rect.bottom + 20}px`;
+                    tutorialModal.style.transform = 'translate(-50%, 0)';
+                }
+            }
+        }, 100);
+    } else {
+        tutorialModal.style.top = '50%';
+        tutorialModal.style.transform = 'translate(-50%, -50%)';
+    }
+
+    tutorialOverlay.style.display = 'block';
+    tutorialModal.style.display = 'block';
+}
+
+
 // --- LÓGICA DE MONTAGEM DAS TELAS ---
 function setupIntro() {
     const container = $('#briefing-container');
@@ -850,7 +973,10 @@ function startQrScanner(final = false) {
 
 // --- INICIALIZAÇÃO E EVENTOS ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Lógica da introdução com vídeo
+    if (localStorage.getItem('tutorialCompleted') === 'true') {
+        gameState.tutorial.completed = true;
+    }
+    
     const splashVideo = $('#splash-video');
     splashVideo.play().catch(error => {
         console.warn("Autoplay do vídeo foi bloqueado. Usando fallback de tempo.", error);
@@ -880,8 +1006,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const eventMap = {
         'enter-game-btn': () => {
-            setupIntro();
-            navigateTo('intro-screen');
+            if (gameState.tutorial.completed) {
+                setupIntro();
+                navigateTo('intro-screen');
+            } else {
+                startTutorial();
+            }
+        },
+        'tutorial-next-btn': () => {
+            gameState.tutorial.step++;
+            showTutorialStep(gameState.tutorial.step);
         },
         'accept-mission-btn': () => {
             setupOnboarding();
@@ -898,8 +1032,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 1500);
                 return;
             }
-            setupHub();
-            navigateTo('hub-screen');
+            if (!gameState.tutorial.completed) {
+                 gameState.tutorial.step++;
+                 showTutorialStep(gameState.tutorial.step);
+            } else {
+                setupHub();
+                navigateTo('hub-screen');
+            }
         },
         'back-to-briefing-btn': () => navigateTo('intro-screen'),
         'scanner-back-btn': () => {

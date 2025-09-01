@@ -54,6 +54,10 @@ body {
     0%, 100% { transform: translateX(-50%) scale(1); box-shadow: 0 0 10px rgba(0, 242, 161, 0.5); } 
     50% { transform: translateX(-50%) scale(1.05); box-shadow: 0 0 20px rgba(0, 242, 161, 0.8); } 
 }
+@keyframes pulse-highlight { 
+    0%, 100% { box-shadow: 0 0 15px 10px rgba(0, 242, 161, 0.7); } 
+    50% { box-shadow: 0 0 25px 15px rgba(0, 242, 161, 0.9); } 
+}
 
 /* ESTILOS DAS NOVAS TELAS DE INTRODUÇÃO */
 #logo-splash-screen {
@@ -67,10 +71,8 @@ body {
 .title-container {
     text-align: center;
 }
-
-/* ALTERAÇÃO DE FONTE */
 .game-title {
-    font-family: var(--font-title); /* <-- FONTE EXO APLICADA */
+    font-family: var(--font-title);
     font-size: 4rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -80,7 +82,7 @@ body {
     margin-bottom: 10px;
 }
 .game-subtitle {
-    font-family: var(--font-subtitle); /* <-- FONTE RAJDHANI APLICADA */
+    font-family: var(--font-subtitle);
     font-size: 1.5rem;
     font-weight: 500;
     color: var(--color-light);
@@ -134,8 +136,6 @@ button.secondary {
     transition: all 0.3s ease;
 }
 
-/* O RESTANTE DO CSS PERMANECE O MESMO... */
-
 .stars-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: 0; }
 .star { position: absolute; background: white; border-radius: 50%; animation: move linear infinite; box-shadow: 0 0 5px white; }
 @keyframes move { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-100vh); opacity: 0; } }
@@ -174,7 +174,7 @@ button.secondary {
     text-align: center;
     margin-top: 30px;
 }
-
+.intro-button-container { text-align: center; margin-top: 20px; margin-bottom: 10px; }
 
 /* ESTILOS DAS PORTAS NO HUB */
 #hub-screen { background-color: transparent; justify-content: flex-start; padding-top: 80px; }
@@ -201,7 +201,7 @@ button.secondary {
 
 .hub-grid { 
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); 
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
     gap: 30px; 
     width: 100%; 
     max-width: 1200px;
@@ -311,7 +311,7 @@ button.secondary {
     text-shadow: 0 0 5px var(--color-primary-glow); 
 }
     
-/* RESTO DO CSS */
+/* RESTANTE DO CSS */
 .char-card { padding: 15px; width: 240px; text-align: center; cursor: pointer; border: 2px solid transparent; }
 .char-card:hover, .char-card.selected { border-color: var(--color-primary-glow); transform: translateY(-5px); box-shadow: 0 5px 20px rgba(0, 242, 161, 0.3); }
 .char-card h3 { font-family: var(--font-pixel); font-size: 1rem; color: var(--color-primary-glow); margin-top: 15px; text-shadow: 0 0 4px var(--color-primary-glow); }
@@ -405,18 +405,17 @@ button.secondary {
 .game-icon { position: absolute; font-size: 1.8rem; cursor: pointer; transition: transform 0.2s; user-select: none; }
 .game-icon:hover { transform: scale(1.2); }
     
-/* ESTILOS DO QUIZ (SAÚDE MENTAL) - ALTERADO */
 .quiz-container { width: 95%; max-width: 500px; }
 .quiz-progress-bar { width: 100%; height: 10px; background-color: rgba(0,0,0,0.3); border-radius: 5px; margin-bottom: 20px; overflow: hidden; }
 .quiz-progress { 
     width: 0%; 
     height: 100%; 
-    background-color: var(--color-primary-glow); /* COR VERDE */
+    background-color: var(--color-primary-glow);
     transition: width 0.5s; 
 }
 .quiz-question { 
     font-family: var(--font-pixel); 
-    color: var(--color-primary-glow); /* COR VERDE */
+    color: var(--color-primary-glow);
     text-shadow: 0 0 5px var(--color-primary-glow); 
     font-size: 0.9rem; 
     line-height: 1.5; 
@@ -428,12 +427,12 @@ button.secondary {
     text-align: left; 
     font-size: 0.8rem; 
     padding: 15px; 
-    border-color: var(--color-primary-glow); /* COR VERDE */
-    color: var(--color-primary-glow); /* COR VERDE */
+    border-color: var(--color-primary-glow);
+    color: var(--color-primary-glow);
 }
 .quiz-options button:before { content: '>> '; }
 .quiz-options button:hover { 
-    background-color: var(--color-primary-glow); /* COR VERDE */
+    background-color: var(--color-primary-glow);
     color: var(--color-dark); 
 }
 
@@ -482,6 +481,53 @@ button.secondary {
 #instructions-modal h3 { font-family: var(--font-pixel); color: var(--color-primary-glow); }
 #instructions-modal .how-to-play { margin: 20px 0; font-size: 0.9rem; }
 #instructions-modal .why-its-important { padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; font-style: italic; }
+
+/* ESTILOS DO NOVO SISTEMA DE TUTORIAL */
+#tutorial-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 9998;
+    animation: fadeIn 0.3s;
+}
+
+#tutorial-modal {
+    display: none;
+    position: fixed;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10000;
+    padding: 25px;
+    width: 90%;
+    max-width: 400px;
+    border: 2px solid var(--color-primary-glow);
+    text-align: center;
+    transition: top 0.4s ease-in-out;
+}
+#tutorial-modal h3 {
+    font-family: var(--font-pixel);
+    color: var(--color-primary-glow);
+    margin-top: 0;
+    font-size: 1rem;
+}
+#tutorial-modal p {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.tutorial-highlight {
+    position: relative;
+    z-index: 9999;
+    border-radius: 12px;
+    animation: pulse-highlight 2s infinite;
+    transition: box-shadow 0.3s ease-in-out;
+}
 
 /* MEDIA QUERIES PARA RESPONSIVIDADE */
 @media (min-width: 768px) {

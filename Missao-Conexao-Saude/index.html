@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Missão: Conexão Saúde</title>
+    
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="stars-bg" id="stars-bg"></div>
+    <div id="achievement-toast"></div>
+
+    <div id="intro-screen" class="screen active">
+        <div class="glass-card intro-card">
+            <h1 class="glitch-title" data-text="BRIEFING DE MISSÃO">BRIEFING DE MISSÃO</h1>
+            <div id="briefing-container" class="briefing-container"></div>
+            <div class="intro-button-container">
+                <button id="accept-mission-btn">Iniciar Missão</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="onboarding-screen" class="screen">
+        <div class="onboarding-container">
+            <div class="intro-button-container">
+                <button id="back-to-briefing-btn" class="secondary" style="margin-bottom: 20px;">Voltar ao Briefing</button>
+            </div>
+            <h1 class="glitch-title" data-text="Escolha seu Agente">Escolha seu Agente</h1>
+            <div id="character-selection" class="character-selection"></div>
+            <div class="start-button-container">
+                <button id="start-mission-btn">Iniciar Missão</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="hub-screen" class="screen">
+        <div id="agent-panel">
+            <div id="agent-panel-info">
+                <div id="agent-panel-avatar" class="pixel-avatar"></div>
+                <span id="agent-panel-name"></span>
+            </div>
+            <div id="agent-panel-achievements">🏆 0 / 0</div>
+        </div>
+        <div class="hub-grid" id="hub-grid"></div>
+        <div id="hub-overlay" class="hub-overlay glass-card">
+            <div id="hub-avatar" class="pixel-avatar"></div>
+            <p>Ver Passe de Agente</p>
+        </div>
+    </div>
+    
+    <div id="scanner-screen" class="screen">
+        <div class="glass-card scanner-card">
+            <h2 class="scanner-title" id="scanner-title">SCANNER DE ACESSO</h2>
+            <p id="scanner-subtitle">Estação: ...</p>
+            <div id="qr-reader"></div>
+            <p id="scanner-message">Aponte a câmera para o QR Code da estação.</p>
+            <div class="scanner-button-container">
+                <button id="scanner-back-btn">Voltar ao Hub</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="minigame-screen" class="screen">
+        <h2 class="minigame-title">Desafio de Hábito</h2>
+        <p class="minigame-instructions">Instruções do desafio aqui...</p>
+        <div id="minigame-container" class="glass-card"></div>
+    </div>
+
+    <div id="pass-screen" class="screen pass-screen">
+        <div class="agent-pass glass-card">
+            <div class="pass-left">
+                <div id="pass-avatar" class="pixel-avatar"></div>
+                <h3 id="pass-name">NOME DO AGENTE</h3>
+                <h4 class="stamps-title">SELOS DA MISSÃO</h4>
+                <div id="stamps-grid" class="stamps-grid"></div>
+            </div>
+            <div class="pass-right">
+                <h4>ATRIBUTOS</h4>
+                <div id="pass-attributes" class="attributes"></div>
+                <h4 class="perks-title">VANTAGENS</h4>
+                <div id="pass-perks" class="perks-section"></div>
+                <h4 class="achievements-title">CONQUISTAS</h4>
+                <div class="achievement-progress">
+                    <div id="achievement-progress-text">0 / 0 Conquistas</div>
+                    <div class="achievement-progress-bar">
+                        <div id="achievement-progress-fill" class="achievement-progress-fill"></div>
+                    </div>
+                </div>
+                <div id="achievements-grid" class="achievements-grid"></div>
+                <button id="pass-back-btn">Voltar ao Hub</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="completion-screen" class="screen">
+        <h1 class="glitch-title completion-title" data-text="MISSÃO CUMPRIDA!">MISSÃO CUMPRIDA!</h1>
+        <div id="completion-avatar" class="pixel-avatar"></div>
+        <p class="completion-text">Parabéns, Agente! Você restaurou a Energia da Conexão.<br>Agora, o passo final: registre sua missão.</p>
+        <button id="register-mission-btn">Registrar Missão</button>
+    </div>
+
+    <div id="final-scanner-screen" class="screen">
+        <div class="glass-card scanner-card">
+            <h2 class="scanner-title">REGISTRO FINAL</h2>
+            <p>Aponte a câmera para o QR Code fornecido pelo ministrador para registrar sua missão no formulário.</p>
+            <div id="final-qr-reader"></div>
+            <p id="final-scanner-message"></p>
+            <div class="scanner-button-container">
+                <button id="final-scanner-back-btn">Voltar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="discovery-modal" class="modal-overlay">
+        <div class="modal-content glass-card">
+            <h2 id="modal-title">ESTAÇÃO CONCLUÍDA!</h2>
+            <div id="commander-feedback"></div>
+            <div id="modal-tip-box" class="tip-box">
+                <p class="tip-icon" style="font-size: 24px; margin: 0;">💡</p>
+                <p id="modal-tip-text"><strong>Super Dica:</strong> ...</p>
+            </div>
+            <div id="master-tip-box" class="tip-box master-tip"></div>
+            <button id="modal-close-btn">Continuar Missão</button>
+        </div>
+    </div>
+
+    <div id="failure-modal" class="modal-overlay">
+        <div class="modal-content glass-card">
+            <h2 id="failure-title">FALHA NO DESAFIO</h2>
+            <p>Você não conseguiu superar o Desafio de Hábito desta vez.</p>
+            <p id="failure-reason"></p>
+            <div class="failure-buttons">
+                <button id="retry-btn">Tentar Novamente</button>
+                <button id="fail-back-to-hub-btn" class="secondary">Voltar ao Hub</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="instructions-modal" class="modal-overlay">
+        <div class="modal-content glass-card instructions-card">
+            <h3 id="instructions-title">Instruções do Desafio</h3>
+            <div id="instructions-how-to" class="how-to-play"></div>
+            <div id="instructions-why" class="why-its-important"></div>
+            <button id="start-challenge-btn">Começar!</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

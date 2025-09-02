@@ -16,7 +16,7 @@ const STATIONS = {
 let qrScanner = null;
 let isScanning = false;
 
-// ==================== UTILITÁRIOS ====================
+// ==================== FUNÇÕES DE NAVEGAÇÃO ====================
 function navigateTo(screenId) {
     document.querySelectorAll(".screen").forEach(s => s.classList.add("hidden"));
     const screen = document.getElementById(screenId);
@@ -32,24 +32,6 @@ function showModal(modalId) {
 function hideModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) modal.classList.add("hidden");
-}
-
-function unlockAchievement(id) {
-    gameState.achievements[id] = true;
-    renderAchievements();
-}
-
-function renderAchievements() {
-    const list = document.getElementById("achievements-list");
-    if (!list) return;
-
-    list.innerHTML = "";
-    Object.keys(gameState.achievements).forEach(id => {
-        const div = document.createElement("div");
-        div.className = "achievement unlocked";
-        div.textContent = id;
-        list.appendChild(div);
-    });
 }
 
 // ==================== SCANNER ====================
@@ -80,7 +62,7 @@ async function startQrScanner(isFinal = false, stationId = null) {
         { fps: 10, qrbox: { width: 250, height: 250 } },
         (decodedText) => {
             if (isFinal) {
-                // TODO: restringir aqui quando tiver QR definitivo
+                // Aceita qualquer QR por enquanto (você vai restringir depois)
                 window.location.href = decodedText;
             } else {
                 const station = STATIONS[stationId];
@@ -240,7 +222,7 @@ function initSwipe(card) {
 
 // ==================== EVENTOS ====================
 document.addEventListener("DOMContentLoaded", () => {
-    // Estrelas de fundo
+    // Estrelas de fundo (uma vez só)
     const starsContainer = document.querySelector(".stars");
     if (starsContainer) {
         for (let i = 0; i < 150; i++) {
@@ -255,7 +237,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Mapa de eventos
+    // Mapa de eventos (único)
     const eventMap = {
         "start-btn": () => navigateTo("intro-screen"),
         "accept-mission-btn": () => navigateTo("onboarding-screen"),

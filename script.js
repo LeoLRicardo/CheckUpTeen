@@ -6,7 +6,6 @@ const CHARACTERS = {
     anna: { id: 'anna', name: 'Anna', image_url: './assets/images/characters/anna.png', desc: 'Agente Estrategista, mestre em inteligência.', attributes: { forca: 1, inteligencia: 5, velocidade: 1, carisma: 5 }, perks: { advantage: { name: 'Mente Brilhante', desc: 'Vantagem em lógica e quiz (Inteligência).' }, disadvantage: { name: 'Ritmo Cauteloso', desc: 'Desvantagem em reflexos (Velocidade).' } } }
 };
 
-// ... [O restante das suas constantes (STATIONS, ACHIEVEMENTS, etc.) permanece exatamente o mesmo] ...
 const STATIONS = {
     mental: { title: 'Saúde Mental', unlocked: false, qrValue: 'QR_MENTAL_2025', achievementId: 'mental_unlocked', tip: 'Respirar fundo por 1 minuto pode acalmar seu cérebro na hora!', challengeAttr: 'inteligencia', masterTip: 'Criar um "diário de gratidão" anota 3 coisas boas do dia e melhora o sono.' },
     sexual: { title: 'Saúde Sexual', unlocked: false, qrValue: 'QR_SEXUAL_2025', achievementId: 'sexual_unlocked', tip: 'Conversar abertamente sobre prevenção é o maior superpoder.', challengeAttr: 'carisma', masterTip: 'Saber dizer "não" de forma clara e respeitosa é uma forma de autocuidado e de respeito ao outro.' },
@@ -65,62 +64,68 @@ const MINIGAME_INSTRUCTIONS = {
     }
 };
 
-const TUTORIAL_STEPS = [
-    {
-        screen: 'onboarding-screen',
-        title: 'Bem-vindo, Agente!',
-        text: 'Sua primeira tarefa é escolher um avatar. Cada um possui Atributos diferentes, como Força e Inteligência.',
-        highlightElement: '#character-selection'
-    },
-    {
-        screen: 'onboarding-screen',
-        title: 'Atributos Importam',
-        text: "Um nível alto em 'Força', por exemplo, trará vantagens em certos desafios físicos, enquanto 'Inteligência' ajudará em outros que exigem lógica. Sua escolha impacta a jogabilidade!",
-        highlightElement: '.attributes'
-    },
-    {
-        screen: 'hub-screen',
-        title: 'Base de Operações',
-        text: 'Esta é sua base de operações. Complete todas as missões para restaurar a Conexão Saúde.',
-        highlightElement: null
-    },
-    {
-        screen: 'hub-screen',
-        title: 'Acesso às Estações',
-        text: 'Para desbloquear cada uma dessas portas, você precisará encontrar e escanear o QR Code físico correspondente com a câmera do seu celular.',
-        highlightElement: '#hub-grid'
-    },
-    {
-        screen: 'hub-screen',
-        title: 'Seu Passe de Agente',
-        text: 'Este é o seu Passe de Agente. Clique aqui a qualquer momento para ver seu progresso, selos e as Conquistas desbloqueadas. Explore tudo para se tornar um agente lendário!',
-        highlightElement: '#hub-overlay'
-    },
-    {
-        screen: 'hub-screen',
-        title: 'Missão Aceita',
-        text: 'O resto é com você, Agente. Boa sorte!',
-        highlightElement: null
-    }
-];
+const TUTORIAL_CHAPTERS = {
+    onboarding: [
+        {
+            screen: 'onboarding-screen',
+            title: 'Bem-vindo, Agente!',
+            text: 'Sua primeira tarefa é escolher um avatar. Cada um possui Atributos e Vantagens diferentes.',
+            highlightElement: '#character-selection'
+        },
+        {
+            screen: 'onboarding-screen',
+            title: 'Atributos Importam',
+            text: "Um nível alto em 'Força' trará vantagens em desafios físicos, enquanto 'Inteligência' ajudará em lógica. Escolha com sabedoria e clique em 'Iniciar Missão'!",
+            highlightElement: '.char-card .attributes'
+        }
+    ],
+    hub: [
+        {
+            screen: 'hub-screen',
+            title: 'Base de Operações',
+            text: 'Esta é sua base. Complete todas as missões para restaurar a Conexão Saúde.',
+            highlightElement: '#hub-grid'
+        },
+        {
+            screen: 'hub-screen',
+            title: 'Acesso às Estações',
+            text: 'Para desbloquear cada uma dessas portas, você precisará encontrar e escanear o QR Code físico correspondente.',
+            highlightElement: '.door-station.locked'
+        },
+        {
+            screen: 'hub-screen',
+            title: 'Seu Passe de Agente',
+            text: 'Clique aqui a qualquer momento para ver seu progresso, selos e Conquistas. Explore tudo para se tornar um agente lendário!',
+            highlightElement: '#hub-overlay'
+        },
+        {
+            screen: 'hub-screen',
+            title: 'Missão Aceita',
+            text: 'O resto é com você, Agente. Boa sorte!',
+            highlightElement: null
+        }
+    ]
+};
 
 let gameState = { 
     player: null, 
-    stations: JSON.parse(JSON.stringify(STATIONS)), 
-    achievements: {}, // Inicializado vazio, preenchido no init
+    stations: {},
+    achievements: {},
     completionCount: { mental: 0, sexual: 0, bucal: 0, nutricao: 0, adolescencia: 0 },
     stationToUnlock: null,
     triesThisStation: 0,
     tutorial: {
         step: 0,
-        completed: false
+        chapter: 'onboarding',
+        completed: false,
+        onboardingCompleted: false
     }
 };
+
 let activeGameIntervals = [];
 let html5QrCode;
 let currentHighlight = null;
 
-// --- FUNÇÕES AUXILIARES E DE NAVEGAÇÃO ---
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => document.querySelectorAll(selector);
 
@@ -128,7 +133,7 @@ const navigateTo = (screenId) => {
     $$('.screen').forEach(s => s.classList.remove('active'));
     $(`#${screenId}`).classList.add('active');
 };
-    
+
 function unlockAchievement(id) {
     if (gameState.achievements[id] && !gameState.achievements[id].unlocked) {
         gameState.achievements[id].unlocked = true;
@@ -149,63 +154,53 @@ function createPixelAvatar(character, container) {
     }
 }
     
-// --- SISTEMA DE TUTORIAL ---
-function startTutorial() {
-    if (gameState.tutorial.completed) {
-        setupIntro();
-        navigateTo('intro-screen');
-        return;
-    }
+function startTutorial(chapter = 'onboarding') {
+    gameState.tutorial.chapter = chapter;
     gameState.tutorial.step = 0;
-    setupIntro();
-    navigateTo('intro-screen');
-    // A primeira dica aparecerá quando o jogador aceitar a missão.
+    showTutorialStep();
 }
 
-function endTutorial() {
+function endTutorialChapter() {
     $('#tutorial-modal').style.display = 'none';
     $('#tutorial-overlay').style.display = 'none';
     if (currentHighlight) {
         currentHighlight.classList.remove('tutorial-highlight');
         currentHighlight = null;
     }
-    gameState.tutorial.completed = true;
-    localStorage.setItem('tutorialCompleted', 'true');
 }
 
-function showTutorialStep(stepIndex) {
+function showTutorialStep() {
     if (currentHighlight) {
         currentHighlight.classList.remove('tutorial-highlight');
         currentHighlight = null;
     }
 
-    if (stepIndex >= TUTORIAL_STEPS.length) {
-        endTutorial();
+    const chapterName = gameState.tutorial.chapter;
+    const stepIndex = gameState.tutorial.step;
+    const chapterSteps = TUTORIAL_CHAPTERS[chapterName];
+
+    if (stepIndex >= chapterSteps.length) {
+        endTutorialChapter();
+        if(chapterName === 'onboarding') {
+            gameState.tutorial.onboardingCompleted = true;
+        }
+        if(chapterName === 'hub') {
+            gameState.tutorial.completed = true;
+            localStorage.setItem('tutorialCompleted', 'true');
+        }
         return;
     }
 
-    const step = TUTORIAL_STEPS[stepIndex];
-    
-    // Garante que a tela necessária para o tutorial esteja pronta
-    if (step.screen === 'onboarding-screen' && !$('#character-selection').innerHTML) {
-        setupOnboarding();
-    }
-    if (step.screen === 'hub-screen' && !$('#hub-grid').innerHTML) {
-        if (!gameState.player) {
-            gameState.player = CHARACTERS.ju; 
-        }
-        setupHub();
-    }
-    
+    const step = chapterSteps[stepIndex];
     navigateTo(step.screen);
 
-    // Usa um pequeno timeout para garantir que a animação da tela termine antes de mostrar o modal.
-    // Isso é mais seguro do que iniciar o tutorial dentro de outro timeout.
     setTimeout(() => {
         const tutorialModal = $('#tutorial-modal');
         $('#tutorial-title').textContent = step.title;
         $('#tutorial-text').textContent = step.text;
-        $('#tutorial-next-btn').textContent = (stepIndex === TUTORIAL_STEPS.length - 1) ? "Finalizar" : "Próximo";
+        
+        let isLastStep = stepIndex === chapterSteps.length - 1;
+        $('#tutorial-next-btn').textContent = isLastStep ? "Entendi!" : "Próximo";
 
         if (step.highlightElement) {
             const elementToHighlight = $(step.highlightElement);
@@ -214,7 +209,9 @@ function showTutorialStep(stepIndex) {
                 elementToHighlight.classList.add('tutorial-highlight');
                 
                 const rect = elementToHighlight.getBoundingClientRect();
-                if (rect.top > window.innerHeight / 2) {
+                const modalHeight = tutorialModal.offsetHeight;
+
+                if (rect.bottom + modalHeight + 20 > window.innerHeight) {
                     tutorialModal.style.top = `${rect.top - 20}px`;
                     tutorialModal.style.transform = 'translate(-50%, -100%)';
                 } else {
@@ -229,11 +226,9 @@ function showTutorialStep(stepIndex) {
 
         $('#tutorial-overlay').style.display = 'block';
         tutorialModal.style.display = 'block';
-    }, 400); // 400ms é um tempo seguro para a animação de fadeIn (0.7s) estar bem encaminhada.
+    }, 100);
 }
 
-// ... [O restante do seu código (setupIntro, createCharacterCard, minigames, etc.) permanece exatamente o mesmo] ...
-// --- LÓGICA DE MONTAGEM DAS TELAS ---
 function setupIntro() {
     const container = $('#briefing-container');
     const button = $('#accept-mission-btn');
@@ -268,7 +263,6 @@ function setupIntro() {
         
         const textElement = document.createElement('div');
         textElement.className = 'dialogue-text';
-        textElement.id = `dialogue-${dialogueIndex}`;
         
         dialogueBox.appendChild(avatarContainer);
         dialogueBox.appendChild(textElement);
@@ -392,7 +386,6 @@ function createDoorElement(id, station) {
         doorReplayText.innerHTML = 'Rejogar 🔄';
     }
 
-
     doorFrame.appendChild(doorPanel);
     doorStation.append(doorFrame, doorTitle, doorStatusIcon, doorReplayText);
     return doorStation;
@@ -436,7 +429,6 @@ function setupHub() {
     createPixelAvatar(gameState.player, $('#hub-avatar'));
 }
 
-
 function handleScanSuccess() {
     const stationId = gameState.stationToUnlock;
     showInstructionsModal(stationId);
@@ -444,11 +436,7 @@ function handleScanSuccess() {
     
 function showInstructionsModal(stationId) {
     const instructions = MINIGAME_INSTRUCTIONS[stationId];
-
-    if (!instructions) {
-        console.error(`Instruções não encontradas para a estação: ${stationId}`);
-        return;
-    }
+    if (!instructions) return;
 
     $('#instructions-title').textContent = instructions.title;
     $('#instructions-how-to').textContent = instructions.how;
@@ -523,7 +511,6 @@ function setupAgentPass() {
     });
 }
     
-// --- LÓGICA DOS MINIGAMES ---
 function clearActiveGameIntervals() { activeGameIntervals.forEach(interval => clearInterval(interval)); activeGameIntervals = []; }
     
 function endMinigame(success, reason = '', perfect = false) { 
@@ -574,7 +561,6 @@ function startMinigame(stationId) {
     navigateTo('minigame-screen');
 }
 
-// ... [As funções dos minigames (setupForcaGame, setupVelocidadeGame, etc.) permanecem exatamente as mesmas] ...
 function setupForcaGame(container) {
     let wins = 0;
     const maxWins = 3;
@@ -977,20 +963,17 @@ function startQrScanner(final = false) {
         });
 }
 
-
-// --- INICIALIZAÇÃO E EVENTOS ---
-
 function init() {
-    // 1. Configurar o estado inicial do jogo
+    gameState.stations = JSON.parse(JSON.stringify(STATIONS));
     gameState.achievements = JSON.parse(JSON.stringify(ACHIEVEMENTS));
     if (localStorage.getItem('tutorialCompleted') === 'true') {
         gameState.tutorial.completed = true;
+        gameState.tutorial.onboardingCompleted = true;
     }
     
-    // 2. Efeitos visuais e de ambiente
     const splashVideo = $('#splash-video');
     splashVideo.play().catch(error => {
-        console.warn("Autoplay do vídeo foi bloqueado. Usando fallback de tempo.", error);
+        console.warn("Autoplay do vídeo foi bloqueado.", error);
         setTimeout(() => { navigateTo('title-screen'); }, 3000);
     });
     splashVideo.addEventListener('ended', () => {
@@ -1006,38 +989,31 @@ function init() {
         starsBg.appendChild(star);
     }
     
-    // 3. Centralizar todos os event listeners
     function stopScannerAndNavigate(screenId) {
         if (html5QrCode && html5QrCode.isScanning) {
             html5QrCode.stop().catch(err => console.error("Falha ao parar scanner:", err));
         }
         if (screenId) {
-            setupHub(); // Garante que o Hub seja atualizado ao voltar
+            setupHub();
             navigateTo(screenId);
         }
     }
 
     const eventMap = {
         'enter-game-btn': () => {
-            if (gameState.tutorial.completed) {
-                setupIntro();
-                navigateTo('intro-screen');
-            } else {
-                startTutorial();
+            setupIntro();
+            navigateTo('intro-screen');
+        },
+        'accept-mission-btn': () => {
+            setupOnboarding();
+            navigateTo('onboarding-screen');
+            if (!gameState.tutorial.onboardingCompleted) {
+                startTutorial('onboarding');
             }
         },
         'tutorial-next-btn': () => {
             gameState.tutorial.step++;
-            showTutorialStep(gameState.tutorial.step);
-        },
-        'accept-mission-btn': () => {
-            // Lógica robusta: prepara a tela, navega, e SÓ ENTÃO mostra o tutorial.
-            setupOnboarding();
-            navigateTo('onboarding-screen');
-
-            if (!gameState.tutorial.completed) {
-                showTutorialStep(gameState.tutorial.step);
-            }
+            showTutorialStep();
         },
         'start-mission-btn': () => {
             if (!gameState.player) {
@@ -1051,16 +1027,12 @@ function init() {
                 return;
             }
             
-            // Se o tutorial estiver incompleto, o botão de avançar o tutorial é o responsável
-            if(!gameState.tutorial.completed) {
-                 // Força o avanço do tutorial se o jogador tentar pular
-                 gameState.tutorial.step++;
-                 showTutorialStep(gameState.tutorial.step);
-                 return;
-            }
-
             setupHub();
             navigateTo('hub-screen');
+
+            if (!gameState.tutorial.completed) {
+                startTutorial('hub');
+            }
         },
         'back-to-briefing-btn': () => navigateTo('intro-screen'),
         'scanner-back-btn': () => stopScannerAndNavigate('hub-screen'),
@@ -1105,5 +1077,4 @@ function init() {
     }
 }
 
-// Inicia o jogo quando o DOM estiver pronto.
 document.addEventListener('DOMContentLoaded', init);

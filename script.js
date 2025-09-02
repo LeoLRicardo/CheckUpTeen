@@ -1,11 +1,12 @@
 // --- CONFIGURAÇÃO DO JOGO ---
 const CHARACTERS = {
-    ju: { id: 'ju', name: 'Ju', image_url: 'assets/images/characters/ju.png', desc: 'Agente Harmonizador, com atributos balanceados.', attributes: { forca: 2, inteligencia: 3, velocidade: 3, carisma: 3 }, perks: { advantage: { name: 'Conexão Genuína', desc: 'Vantagem em diálogos (Carisma).' }, disadvantage: { name: 'Busca o Equilíbrio', desc: 'Desvantagem em reflexos (Velocidade).' } } },
-    joao: { id: 'joao', name: 'João', image_url: 'assets/images/characters/joao.png', desc: 'Agente Tático, especialista em velocidade.', attributes: { forca: 3, inteligencia: 1, velocidade: 5, carisma: 2 }, perks: { advantage: { name: 'Pique de Atleta', desc: 'Vantagem em reflexos (Velocidade).' }, disadvantage: { name: 'Impaciente', desc: 'Desvantagem em lógica (Inteligência).' } } },
-    leo: { id: 'leo', name: 'Léo', image_url: 'assets/images/characters/leo.png', desc: 'Agente de Vanguarda, focado em força.', attributes: { forca: 5, inteligencia: 4, velocidade: 3, carisma: 1 }, perks: { advantage: { name: 'Força de Vontade', desc: 'Vantagem em precisão (Força).' }, disadvantage: { name: 'Pavio Curto', desc: 'Sua sinceridade excessiva pode magoar os outros.' } } },
-    anna: { id: 'anna', name: 'Anna', image_url: 'assets/images/characters/anna.png', desc: 'Agente Estrategista, mestre em inteligência.', attributes: { forca: 1, inteligencia: 5, velocidade: 1, carisma: 5 }, perks: { advantage: { name: 'Mente Brilhante', desc: 'Vantagem em lógica e quiz (Inteligência).' }, disadvantage: { name: 'Ritmo Cauteloso', desc: 'Desvantagem em reflexos (Velocidade).' } } }
+    ju: { id: 'ju', name: 'Ju', image_url: './assets/images/characters/ju.png', desc: 'Agente Harmonizador, com atributos balanceados.', attributes: { forca: 2, inteligencia: 3, velocidade: 3, carisma: 3 }, perks: { advantage: { name: 'Conexão Genuína', desc: 'Vantagem em diálogos (Carisma).' }, disadvantage: { name: 'Busca o Equilíbrio', desc: 'Desvantagem em reflexos (Velocidade).' } } },
+    joao: { id: 'joao', name: 'João', image_url: './assets/images/characters/joao.png', desc: 'Agente Tático, especialista em velocidade.', attributes: { forca: 3, inteligencia: 1, velocidade: 5, carisma: 2 }, perks: { advantage: { name: 'Pique de Atleta', desc: 'Vantagem em reflexos (Velocidade).' }, disadvantage: { name: 'Impaciente', desc: 'Desvantagem em lógica (Inteligência).' } } },
+    leo: { id: 'leo', name: 'Léo', image_url: './assets/images/characters/leo.png', desc: 'Agente de Vanguarda, focado em força.', attributes: { forca: 5, inteligencia: 4, velocidade: 3, carisma: 1 }, perks: { advantage: { name: 'Força de Vontade', desc: 'Vantagem em precisão (Força).' }, disadvantage: { name: 'Pavio Curto', desc: 'Sua sinceridade excessiva pode magoar os outros.' } } },
+    anna: { id: 'anna', name: 'Anna', image_url: './assets/images/characters/anna.png', desc: 'Agente Estrategista, mestre em inteligência.', attributes: { forca: 1, inteligencia: 5, velocidade: 1, carisma: 5 }, perks: { advantage: { name: 'Mente Brilhante', desc: 'Vantagem em lógica e quiz (Inteligência).' }, disadvantage: { name: 'Ritmo Cauteloso', desc: 'Desvantagem em reflexos (Velocidade).' } } }
 };
 
+// ... [O restante das suas constantes (STATIONS, ACHIEVEMENTS, etc.) permanece exatamente o mesmo] ...
 const STATIONS = {
     mental: { title: 'Saúde Mental', unlocked: false, qrValue: 'QR_MENTAL_2025', achievementId: 'mental_unlocked', tip: 'Respirar fundo por 1 minuto pode acalmar seu cérebro na hora!', challengeAttr: 'inteligencia', masterTip: 'Criar um "diário de gratidão" anota 3 coisas boas do dia e melhora o sono.' },
     sexual: { title: 'Saúde Sexual', unlocked: false, qrValue: 'QR_SEXUAL_2025', achievementId: 'sexual_unlocked', tip: 'Conversar abertamente sobre prevenção é o maior superpoder.', challengeAttr: 'carisma', masterTip: 'Saber dizer "não" de forma clara e respeitosa é uma forma de autocuidado e de respeito ao outro.' },
@@ -64,21 +65,6 @@ const MINIGAME_INSTRUCTIONS = {
     }
 };
 
-let gameState = { 
-    player: null, 
-    stations: JSON.parse(JSON.stringify(STATIONS)), 
-    achievements: JSON.parse(JSON.stringify(ACHIEVEMENTS)),
-    completionCount: { mental: 0, sexual: 0, bucal: 0, nutricao: 0, adolescencia: 0 },
-    stationToUnlock: null,
-    triesThisStation: 0,
-    tutorial: {
-        step: 0,
-        completed: false
-    }
-};
-let activeGameIntervals = [];
-let html5QrCode;
-
 const TUTORIAL_STEPS = [
     {
         screen: 'onboarding-screen',
@@ -118,6 +104,22 @@ const TUTORIAL_STEPS = [
     }
 ];
 
+let gameState = { 
+    player: null, 
+    stations: JSON.parse(JSON.stringify(STATIONS)), 
+    achievements: {}, // Inicializado vazio, preenchido no init
+    completionCount: { mental: 0, sexual: 0, bucal: 0, nutricao: 0, adolescencia: 0 },
+    stationToUnlock: null,
+    triesThisStation: 0,
+    tutorial: {
+        step: 0,
+        completed: false
+    }
+};
+let activeGameIntervals = [];
+let html5QrCode;
+let currentHighlight = null;
+
 // --- FUNÇÕES AUXILIARES E DE NAVEGAÇÃO ---
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => document.querySelectorAll(selector);
@@ -148,10 +150,6 @@ function createPixelAvatar(character, container) {
 }
     
 // --- SISTEMA DE TUTORIAL ---
-const tutorialModal = $('#tutorial-modal');
-const tutorialOverlay = $('#tutorial-overlay');
-let currentHighlight = null;
-
 function startTutorial() {
     if (gameState.tutorial.completed) {
         setupIntro();
@@ -159,15 +157,14 @@ function startTutorial() {
         return;
     }
     gameState.tutorial.step = 0;
-    // O tutorial agora começa na tela de briefing
     setupIntro();
     navigateTo('intro-screen');
-    // A primeira dica aparecerá quando o jogador aceitar a missão
+    // A primeira dica aparecerá quando o jogador aceitar a missão.
 }
 
 function endTutorial() {
-    tutorialModal.style.display = 'none';
-    tutorialOverlay.style.display = 'none';
+    $('#tutorial-modal').style.display = 'none';
+    $('#tutorial-overlay').style.display = 'none';
     if (currentHighlight) {
         currentHighlight.classList.remove('tutorial-highlight');
         currentHighlight = null;
@@ -189,13 +186,12 @@ function showTutorialStep(stepIndex) {
 
     const step = TUTORIAL_STEPS[stepIndex];
     
-    // Prepara a tela necessária para o passo do tutorial ANTES de navegar
+    // Garante que a tela necessária para o tutorial esteja pronta
     if (step.screen === 'onboarding-screen' && !$('#character-selection').innerHTML) {
         setupOnboarding();
     }
     if (step.screen === 'hub-screen' && !$('#hub-grid').innerHTML) {
         if (!gameState.player) {
-            // Se o jogador não escolheu um personagem durante o tutorial, selecionamos um padrão
             gameState.player = CHARACTERS.ju; 
         }
         setupHub();
@@ -203,8 +199,10 @@ function showTutorialStep(stepIndex) {
     
     navigateTo(step.screen);
 
-    // Espera um pouco para a animação da tela terminar antes de mostrar o tutorial
+    // Usa um pequeno timeout para garantir que a animação da tela termine antes de mostrar o modal.
+    // Isso é mais seguro do que iniciar o tutorial dentro de outro timeout.
     setTimeout(() => {
+        const tutorialModal = $('#tutorial-modal');
         $('#tutorial-title').textContent = step.title;
         $('#tutorial-text').textContent = step.text;
         $('#tutorial-next-btn').textContent = (stepIndex === TUTORIAL_STEPS.length - 1) ? "Finalizar" : "Próximo";
@@ -229,20 +227,12 @@ function showTutorialStep(stepIndex) {
             tutorialModal.style.transform = 'translate(-50%, -50%)';
         }
 
-        tutorialOverlay.style.display = 'block';
+        $('#tutorial-overlay').style.display = 'block';
         tutorialModal.style.display = 'block';
-    }, 400); // Aumentamos o tempo de espera para 400ms para maior estabilidade
+    }, 400); // 400ms é um tempo seguro para a animação de fadeIn (0.7s) estar bem encaminhada.
 }
 
-// --- Controle manual do tutorial (apenas uma vez, fora das funções) ---
-document.addEventListener("DOMContentLoaded", () => {
-    $('#tutorial-next-btn').addEventListener('click', () => {
-        gameState.tutorial.step++;
-        showTutorialStep(gameState.tutorial.step);
-    });
-});
-
-
+// ... [O restante do seu código (setupIntro, createCharacterCard, minigames, etc.) permanece exatamente o mesmo] ...
 // --- LÓGICA DE MONTAGEM DAS TELAS ---
 function setupIntro() {
     const container = $('#briefing-container');
@@ -584,6 +574,7 @@ function startMinigame(stationId) {
     navigateTo('minigame-screen');
 }
 
+// ... [As funções dos minigames (setupForcaGame, setupVelocidadeGame, etc.) permanecem exatamente as mesmas] ...
 function setupForcaGame(container) {
     let wins = 0;
     const maxWins = 3;
@@ -986,12 +977,17 @@ function startQrScanner(final = false) {
         });
 }
 
+
 // --- INICIALIZAÇÃO E EVENTOS ---
-document.addEventListener('DOMContentLoaded', () => {
+
+function init() {
+    // 1. Configurar o estado inicial do jogo
+    gameState.achievements = JSON.parse(JSON.stringify(ACHIEVEMENTS));
     if (localStorage.getItem('tutorialCompleted') === 'true') {
         gameState.tutorial.completed = true;
     }
     
+    // 2. Efeitos visuais e de ambiente
     const splashVideo = $('#splash-video');
     splashVideo.play().catch(error => {
         console.warn("Autoplay do vídeo foi bloqueado. Usando fallback de tempo.", error);
@@ -1010,11 +1006,13 @@ document.addEventListener('DOMContentLoaded', () => {
         starsBg.appendChild(star);
     }
     
+    // 3. Centralizar todos os event listeners
     function stopScannerAndNavigate(screenId) {
         if (html5QrCode && html5QrCode.isScanning) {
             html5QrCode.stop().catch(err => console.error("Falha ao parar scanner:", err));
         }
         if (screenId) {
+            setupHub(); // Garante que o Hub seja atualizado ao voltar
             navigateTo(screenId);
         }
     }
@@ -1033,27 +1031,15 @@ document.addEventListener('DOMContentLoaded', () => {
             showTutorialStep(gameState.tutorial.step);
         },
         'accept-mission-btn': () => {
-    console.log("Botão 'Iniciar Missão' clicado."); // Passo 1: Confirma que o clique foi registrado.
+            // Lógica robusta: prepara a tela, navega, e SÓ ENTÃO mostra o tutorial.
+            setupOnboarding();
+            navigateTo('onboarding-screen');
 
-    // Primeiro, preparamos e navegamos para a próxima tela.
-    setupOnboarding();
-    navigateTo('onboarding-screen');
-
-    // Agora, verificamos se o tutorial precisa ser iniciado.
-    if (!gameState.tutorial.completed) {
-        console.log("Tutorial não está completo. Iniciando a exibição..."); // Passo 2: Confirma que a condição foi atendida.
-
-        // Usamos um pequeno atraso para garantir que a animação da tela
-        // não interfira com o aparecimento do modal do tutorial.
-        setTimeout(() => {
-            console.log("Mostrando a etapa 0 do tutorial."); // Passo 3: Confirma a chamada da função.
-            showTutorialStep(gameState.tutorial.step); // Efetivamente mostra o tutorial.
-        }, 500); // 500 milissegundos de atraso.
-    }
-},
+            if (!gameState.tutorial.completed) {
+                showTutorialStep(gameState.tutorial.step);
+            }
+        },
         'start-mission-btn': () => {
-            // Se o tutorial não estiver completo, o botão não faz nada sozinho.
-            if (!gameState.tutorial.completed) return;
             if (!gameState.player) {
                 const btn = $('#start-mission-btn');
                 btn.style.borderColor = "var(--color-accent2-glow)";
@@ -1064,14 +1050,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 1500);
                 return;
             }
+            
+            // Se o tutorial estiver incompleto, o botão de avançar o tutorial é o responsável
+            if(!gameState.tutorial.completed) {
+                 // Força o avanço do tutorial se o jogador tentar pular
+                 gameState.tutorial.step++;
+                 showTutorialStep(gameState.tutorial.step);
+                 return;
+            }
+
             setupHub();
             navigateTo('hub-screen');
         },
         'back-to-briefing-btn': () => navigateTo('intro-screen'),
-        'scanner-back-btn': () => {
-            stopScannerAndNavigate('hub-screen');
-            setupHub();
-        },
+        'scanner-back-btn': () => stopScannerAndNavigate('hub-screen'),
         'retry-btn': () => { 
             gameState.triesThisStation++;
             $('#failure-modal').classList.remove('visible'); 
@@ -1079,8 +1071,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         'fail-back-to-hub-btn': () => {
             $('#failure-modal').classList.remove('visible');
-            navigateTo('hub-screen');
-            setupHub();
+            stopScannerAndNavigate('hub-screen');
         },
         'modal-close-btn': () => {
             $('#discovery-modal').classList.remove('visible');
@@ -1089,8 +1080,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 createPixelAvatar(gameState.player, $('#completion-avatar'));
                 navigateTo('completion-screen');
             } else {
-                setupHub();
-                navigateTo('hub-screen');
+                stopScannerAndNavigate('hub-screen');
             }
         },
         'hub-overlay': () => {
@@ -1113,4 +1103,7 @@ document.addEventListener('DOMContentLoaded', () => {
             element.addEventListener('click', action); 
         }
     }
-});
+}
+
+// Inicia o jogo quando o DOM estiver pronto.
+document.addEventListener('DOMContentLoaded', init);

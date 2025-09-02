@@ -5,7 +5,6 @@ const CHARACTERS = {
     leo: { id: 'leo', name: 'Léo', image_url: './assets/images/characters/leo.png', desc: 'Agente de Vanguarda, focado em força.', attributes: { forca: 5, inteligencia: 4, velocidade: 3, carisma: 1 }, perks: { advantage: { name: 'Força de Vontade', desc: 'Vantagem em precisão (Força).' }, disadvantage: { name: 'Pavio Curto', desc: 'Sua sinceridade excessiva pode magoar os outros.' } } },
     anna: { id: 'anna', name: 'Anna', image_url: './assets/images/characters/anna.png', desc: 'Agente Estrategista, mestre em inteligência.', attributes: { forca: 1, inteligencia: 5, velocidade: 1, carisma: 5 }, perks: { advantage: { name: 'Mente Brilhante', desc: 'Vantagem em lógica e quiz (Inteligência).' }, disadvantage: { name: 'Ritmo Cauteloso', desc: 'Desvantagem em reflexos (Velocidade).' } } }
 };
-
 const STATIONS = {
     mental: { title: 'Saúde Mental', unlocked: false, qrValue: 'QR_MENTAL_2025', achievementId: 'mental_unlocked', tip: 'Respirar fundo por 1 minuto pode acalmar seu cérebro na hora!', challengeAttr: 'inteligencia', masterTip: 'Criar um "diário de gratidão" anota 3 coisas boas do dia e melhora o sono.' },
     sexual: { title: 'Saúde Sexual', unlocked: false, qrValue: 'QR_SEXUAL_2025', achievementId: 'sexual_unlocked', tip: 'Conversar abertamente sobre prevenção é o maior superpoder.', challengeAttr: 'carisma', masterTip: 'Saber dizer "não" de forma clara e respeitosa é uma forma de autocuidado e de respeito ao outro.' },
@@ -13,7 +12,6 @@ const STATIONS = {
     nutricao: { title: 'Nutrição', unlocked: false, qrValue: 'QR_NUTRICAO_2025', achievementId: 'nutricao_unlocked', tip: 'Beber água antes de sentir sede mantém seu corpo com energia máxima.', challengeAttr: 'velocidade', masterTip: 'Comer um punhado de castanhas pode dar mais energia para estudar do que um doce.' },
     adolescencia: { title: 'Adolescência', unlocked: false, qrValue: 'QR_ADOLESCENCIA_2025', achievementId: 'adolescencia_unlocked', tip: 'Entender as mudanças do seu corpo te dá mais confiança para tomar decisões.', challengeAttr: 'inteligencia', masterTip: 'As emoções na adolescência são intensas. Aprender a nomeá-las é o primeiro passo para lidar com elas.' }
 };
-    
 const ACHIEVEMENTS = {
     'mental_unlocked': { name: '[Tá na Mente!]', desc: 'Completou a estação de Saúde Mental.', locked_desc: '???' },
     'sexual_unlocked': { name: '[Tá no Papo!]', desc: 'Completou a estação de Saúde Sexual.', locked_desc: '???' },
@@ -27,7 +25,6 @@ const ACHIEVEMENTS = {
     'first_try_master': { name: '[Mestre de Primeira]', desc: 'Conquista Secreta: Passou de um desafio na primeira tentativa.', locked_desc: '???' },
     'speed_demon': { name: '[Ligeirinho]', desc: 'Conquista Secreta: Venceu o desafio de nutrição com perfeição.', locked_desc: '???' }
 };
-
 const COMMANDER_FEEDBACK = {
     mental: ["Sua mente está afiada, agente! Excelente foco.", "Percebi sua calma e clareza. Continue assim!", "Ótimo trabalho em manter o equilíbrio mental."],
     sexual: ["Informação é poder, e você provou isso. Missão cumprida.", "Sua responsabilidade é exemplar. Continue seguro!", "Comunicação e respeito são suas melhores ferramentas. Excelente!"],
@@ -35,7 +32,6 @@ const COMMANDER_FEEDBACK = {
     nutricao: ["Seus reflexos estão em dia! A energia está fluindo.", "Você é rápido nas escolhas certas. Continue nutrindo sua força.", "Velocidade e saúde andam juntas. Você provou isso!"],
     adolescencia: ["Entender a si mesmo é o maior desafio. Você conseguiu!", "Sua capacidade de tomar decisões conscientes é notável.", "Grande passo, agente. O autoconhecimento é uma jornada contínua."]
 };
-
 const MINIGAME_INSTRUCTIONS = {
     bucal: {
         title: "Desafio de Força",
@@ -63,7 +59,6 @@ const MINIGAME_INSTRUCTIONS = {
         why: "A adolescência é um ato de malabarismo. Este desafio te ajuda a visualizar como suas escolhas impactam diferentes áreas da sua vida, buscando sempre o caminho mais equilibrado."
     }
 };
-
 const TUTORIAL_CHAPTERS = {
     onboarding: [
         {
@@ -107,6 +102,16 @@ const TUTORIAL_CHAPTERS = {
     ]
 };
 
+// --- FUNÇÕES AUXILIARES E ELEMENTOS GLOBAIS ---
+const $ = (selector) => document.querySelector(selector);
+const $$ = (selector) => document.querySelectorAll(selector);
+
+const navigateTo = (screenId) => {
+    $$('.screen').forEach(s => s.classList.remove('active'));
+    $(`#${screenId}`).classList.add('active');
+};
+
+// --- ESTADO GLOBAL E ELEMENTOS CACHEADOS ---
 let gameState = { 
     player: null, 
     stations: {},
@@ -121,18 +126,15 @@ let gameState = {
         onboardingCompleted: false
     }
 };
-
 let activeGameIntervals = [];
 let html5QrCode;
 let currentHighlight = null;
+// CORREÇÃO: Readicionando as variáveis globais para os elementos do tutorial.
+// Elas precisam ser declaradas DEPOIS da função '$' ser definida.
+let tutorialModal, tutorialOverlay;
 
-const $ = (selector) => document.querySelector(selector);
-const $$ = (selector) => document.querySelectorAll(selector);
 
-const navigateTo = (screenId) => {
-    $$('.screen').forEach(s => s.classList.remove('active'));
-    $(`#${screenId}`).classList.add('active');
-};
+// --- FUNÇÕES PRINCIPAIS DO JOGO ---
 
 function unlockAchievement(id) {
     if (gameState.achievements[id] && !gameState.achievements[id].unlocked) {
@@ -161,8 +163,8 @@ function startTutorial(chapter = 'onboarding') {
 }
 
 function endTutorialChapter() {
-    $('#tutorial-modal').style.display = 'none';
-    $('#tutorial-overlay').style.display = 'none';
+    tutorialModal.style.display = 'none';
+    tutorialOverlay.style.display = 'none';
     if (currentHighlight) {
         currentHighlight.classList.remove('tutorial-highlight');
         currentHighlight = null;
@@ -192,11 +194,8 @@ function showTutorialStep() {
     }
 
     const step = chapterSteps[stepIndex];
-    // REMOÇÃO DA LINHA REDUNDANTE: A navegação agora é feita ANTES de chamar o tutorial.
-    // navigateTo(step.screen); 
 
     setTimeout(() => {
-        const tutorialModal = $('#tutorial-modal');
         $('#tutorial-title').textContent = step.title;
         $('#tutorial-text').textContent = step.text;
         
@@ -225,7 +224,7 @@ function showTutorialStep() {
             tutorialModal.style.transform = 'translate(-50%, -50%)';
         }
 
-        $('#tutorial-overlay').style.display = 'block';
+        tutorialOverlay.style.display = 'block';
         tutorialModal.style.display = 'block';
     }, 100);
 }
@@ -965,13 +964,19 @@ function startQrScanner(final = false) {
 }
 
 function init() {
+    // 1. Configurar o estado inicial do jogo
     gameState.stations = JSON.parse(JSON.stringify(STATIONS));
     gameState.achievements = JSON.parse(JSON.stringify(ACHIEVEMENTS));
     if (localStorage.getItem('tutorialCompleted') === 'true') {
         gameState.tutorial.completed = true;
         gameState.tutorial.onboardingCompleted = true;
     }
+
+    // CORREÇÃO: Define as variáveis globais dos elementos aqui, depois que o DOM está pronto.
+    tutorialModal = $('#tutorial-modal');
+    tutorialOverlay = $('#tutorial-overlay');
     
+    // 2. Efeitos visuais e de ambiente
     const splashVideo = $('#splash-video');
     splashVideo.play().catch(error => {
         console.warn("Autoplay do vídeo foi bloqueado.", error);
@@ -990,6 +995,7 @@ function init() {
         starsBg.appendChild(star);
     }
     
+    // 3. Centralizar todos os event listeners
     function stopScannerAndNavigate(screenId) {
         if (html5QrCode && html5QrCode.isScanning) {
             html5QrCode.stop().catch(err => console.error("Falha ao parar scanner:", err));

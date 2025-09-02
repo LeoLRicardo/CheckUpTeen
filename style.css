@@ -523,10 +523,20 @@ button.secondary {
 
 .tutorial-highlight {
     position: relative;
-    z-index: 9999;
+    z-index: 9999; /* Fica acima do overlay */
     border-radius: 12px;
-    animation: pulse-highlight 2s infinite;
-    transition: box-shadow 0.3s ease-in-out;
+    
+    /* A sombra gigantesca cria o fundo escuro, "cortando" um buraco para o elemento */
+    box-shadow: 0 0 0 500vmax rgba(0, 0, 0, 0.7);
+
+    /* Uma animação de 'outline' para pulsar e chamar atenção */
+    outline: 2px solid var(--color-primary-glow);
+    animation: pulse-outline 1.5s infinite;
+}
+
+@keyframes pulse-outline { 
+    0%, 100% { outline-offset: 0px; outline-color: rgba(0, 242, 161, 0.7); } 
+    50% { outline-offset: 5px; outline-color: rgba(0, 242, 161, 1); } 
 }
 
 /* MEDIA QUERIES PARA RESPONSIVIDADE */

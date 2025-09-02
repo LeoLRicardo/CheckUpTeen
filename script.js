@@ -192,7 +192,8 @@ function showTutorialStep() {
     }
 
     const step = chapterSteps[stepIndex];
-    navigateTo(step.screen);
+    // REMOÇÃO DA LINHA REDUNDANTE: A navegação agora é feita ANTES de chamar o tutorial.
+    // navigateTo(step.screen); 
 
     setTimeout(() => {
         const tutorialModal = $('#tutorial-modal');

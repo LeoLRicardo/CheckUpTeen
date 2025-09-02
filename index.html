@@ -3,139 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Missão Cidade</title>
+    <title>Check-Up Teen</title>
+    
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <link rel="stylesheet" href="style.css">
-    <script src="https://unpkg.com/html5-qrcode"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Exo:wght@700&family=Rajdhani:wght@500&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Tela inicial -->
+    <div class="stars-bg" id="stars-bg"></div>
+    <div id="achievement-toast"></div>
+
+    <div id="logo-splash-screen" class="screen active">
+        <video id="splash-video" src="assets/videos/logo-prefeitura.mp4" autoplay muted playsinline>
+            Seu navegador não suporta a tag de vídeo.
+        </video>
+    </div>
+
     <div id="title-screen" class="screen">
-        <div class="stars"></div>
-        <div class="content">
-            <h1>Missão Cidade</h1>
-            <button id="start-btn">Iniciar</button>
+        <div class="title-container">
+            <h1 class="game-title" data-text="Check-Up Teen">Check-Up Teen</h1>
+            <p class="game-subtitle">Combatendo a desinformação</p>
+            <button id="enter-game-btn">Entrar</button>
         </div>
     </div>
 
-    <!-- Tela de briefing -->
-    <div id="intro-screen" class="screen hidden">
-        <div class="content">
-            <h2>Briefing da Missão</h2>
-            <p>Você está prestes a embarcar em uma aventura pela cidade, completando desafios e descobrindo segredos.</p>
-            <button id="accept-mission-btn">Aceitar Missão</button>
-        </div>
-    </div>
-
-    <!-- Onboarding -->
-    <div id="onboarding-screen" class="screen hidden">
-        <div class="content">
-            <h2>Registro da Missão</h2>
-            <p>Preencha seu nome para começar sua jornada:</p>
-            <input type="text" id="player-name" placeholder="Seu nome">
-            <button id="register-mission-btn">Registrar</button>
-        </div>
-    </div>
-
-    <!-- Hub -->
-    <div id="hub-screen" class="screen hidden">
-        <div class="content">
-            <h2>Central de Missões</h2>
-            <div id="mission-pass">
-                <h3>Progresso da Missão</h3>
-                <div id="progress-bar"></div>
+    <div id="intro-screen" class="screen">
+        <div class="glass-card intro-card">
+            <h1 class="glitch-title" data-text="BRIEFING DE MISSÃO">BRIEFING DE MISSÃO</h1>
+            <div id="briefing-container" class="briefing-container"></div>
+            <div class="intro-button-container">
+                <button id="accept-mission-btn">Iniciar Missão</button>
             </div>
-            <button id="open-scanner-btn">Escanear QR Code</button>
-            <button id="open-achievements-btn">Ver Conquistas</button>
         </div>
     </div>
 
-    <!-- Scanner de estação -->
-    <div id="scanner-screen" class="screen hidden">
-        <div class="content">
-            <h2>Scanner de QR Code</h2>
-            <p id="scanner-station-title">Estação: </p>
+    <div id="onboarding-screen" class="screen">
+        <div class="onboarding-container">
+             <div class="intro-button-container">
+                <button id="back-to-briefing-btn" class="secondary" style="margin-bottom: 20px;">Voltar ao Briefing</button>
+            </div>
+            <h1 class="glitch-title" data-text="Escolha seu Agente">Escolha seu Agente</h1>
+            <div id="character-selection" class="character-selection"></div>
+            <div class="start-button-container">
+                <button id="start-mission-btn">Iniciar Missão</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="hub-screen" class="screen">
+        <div id="agent-panel">
+            <div id="agent-panel-info">
+                <div id="agent-panel-avatar" class="pixel-avatar"></div>
+                <span id="agent-panel-name"></span>
+            </div>
+            <div id="agent-panel-achievements">🏆 0 / 0</div>
+        </div>
+        <div class="hub-grid" id="hub-grid"></div>
+        <div id="hub-overlay" class="hub-overlay glass-card">
+            <div id="hub-avatar" class="pixel-avatar"></div>
+            <p>Ver Passe de Agente</p>
+        </div>
+    </div>
+    
+    <div id="scanner-screen" class="screen">
+        <div class="glass-card scanner-card">
+            <h2 class="scanner-title" id="scanner-title">SCANNER DE ACESSO</h2>
+            <p id="scanner-subtitle">Estação: ...</p>
             <div id="qr-reader"></div>
-            <p id="scanner-message">Aponte a câmera para o QR Code</p>
-            <button id="close-scanner-btn">Voltar</button>
-        </div>
-    </div>
-
-    <!-- Minigame -->
-    <div id="minigame-screen" class="screen hidden">
-        <div class="content">
-            <h2>Minigame</h2>
-            <div id="minigame-container"></div>
-            <div id="swipe-instructions">
-                <p>Deslize para a direita (✔️) ou esquerda (❌) para responder.</p>
+            <p id="scanner-message">Aponte a câmera para o QR Code da estação.</p>
+            <div class="scanner-button-container">
+                <button id="scanner-back-btn">Voltar ao Hub</button>
             </div>
         </div>
     </div>
 
-    <!-- Tela de sucesso da estação -->
-    <div id="completion-screen" class="screen hidden">
-        <div class="content">
-            <h2>Estação Concluída!</h2>
-            <p>Você completou os desafios desta estação.</p>
-            <button id="completion-back-to-hub-btn">Voltar ao Hub</button>
-        </div>
+    <div id="minigame-screen" class="screen">
+        <h2 class="minigame-title">Desafio de Hábito</h2>
+        <p class="minigame-instructions">Instruções do desafio aqui...</p>
+        <div id="minigame-container" class="glass-card"></div>
     </div>
 
-    <!-- Scanner final -->
-    <div id="final-scanner-screen" class="screen hidden">
-        <div class="content">
-            <h2>Scanner Final</h2>
-            <p>Aponte a câmera para o QR Code final para concluir sua missão.</p>
+    <div id="pass-screen" class="screen pass-screen">
+        <div class="agent-pass glass-card">
+            <div class="pass-left">
+                <div id="pass-avatar" class="pixel-avatar"></div>
+                <h3 id="pass-name">NOME DO AGENTE</h3>
+                <h4 class="stamps-title">SELOS DA MISSÃO</h4>
+                <div id="stamps-grid" class="stamps-grid"></div>
+            </div>
+            <div class="pass-right">
+                <h4>ATRIBUTOS</h4>
+                <div id="pass-attributes" class="attributes"></div>
+                <h4 class="perks-title">VANTAGENS</h4>
+                <div id="pass-perks" class="perks-section"></div>
+                <h4 class="achievements-title">CONQUISTAS</h4>
+                <div class="achievement-progress">
+                    <div id="achievement-progress-text">0 / 0 Conquistas</div>
+                    <div class="achievement-progress-bar">
+                        <div id="achievement-progress-fill" class="achievement-progress-fill"></div>
+                    </div>
+                </div>
+                <div id="achievements-grid" class="achievements-grid"></div>
+                <button id="pass-back-btn">Voltar ao Hub</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="completion-screen" class="screen">
+        <h1 class="glitch-title completion-title" data-text="MISSÃO CUMPRIDA!">MISSÃO CUMPRIDA!</h1>
+        <div id="completion-avatar" class="pixel-avatar"></div>
+        <p class="completion-text">Parabéns, Agente! Você restaurou a Energia da Conexão.<br>Agora, o passo final: registre sua missão.</p>
+        <button id="register-mission-btn">Registrar Missão</button>
+    </div>
+
+    <div id="final-scanner-screen" class="screen">
+        <div class="glass-card scanner-card">
+            <h2 class="scanner-title">REGISTRO FINAL</h2>
+            <p>Aponte para o QR Code fornecido pelo ministrador para registrar sua missão no formulário.</p>
             <div id="final-qr-reader"></div>
-            <p id="final-scanner-message">Aponte a câmera para o QR Code final</p>
-            <button id="close-final-scanner-btn">Voltar</button>
+            <p id="final-scanner-message"></p>
+            <div class="scanner-button-container">
+                <button id="final-scanner-back-btn">Voltar</button>
+            </div>
         </div>
     </div>
 
-    <!-- Modal descoberta -->
-    <div id="discovery-modal" class="modal hidden">
-        <div class="modal-content">
-            <h2>Descoberta!</h2>
-            <p id="discovery-message"></p>
-            <div id="avatar-container"></div>
-            <button id="modal-close-btn">Continuar</button>
+    <div id="discovery-modal" class="modal-overlay">
+        <div class="modal-content glass-card">
+            <h2 id="modal-title">ESTAÇÃO CONCLUÍDA!</h2>
+            <div id="commander-feedback"></div>
+            <div id="modal-tip-box" class="tip-box">
+                <p class="tip-icon" style="font-size: 24px; margin: 0;">💡</p>
+                <p id="modal-tip-text"><strong>Super Dica:</strong> ...</p>
+            </div>
+            <div id="master-tip-box" class="tip-box master-tip"></div>
+            <button id="modal-close-btn">Continuar Missão</button>
         </div>
     </div>
 
-    <!-- Modal falha -->
-    <div id="failure-modal" class="modal hidden">
-        <div class="modal-content">
-            <h2>Falha na Missão</h2>
-            <p>Você não completou o desafio. Tente novamente!</p>
-            <button id="retry-btn">Tentar Novamente</button>
-            <button id="fail-back-to-hub-btn">Voltar ao Hub</button>
+    <div id="failure-modal" class="modal-overlay">
+        <div class="modal-content glass-card">
+            <h2 id="failure-title">FALHA NO DESAFIO</h2>
+            <p>Você não conseguiu superar o Desafio de Hábito desta vez.</p>
+            <p id="failure-reason"></p>
+            <div class="failure-buttons">
+                <button id="retry-btn">Tentar Novamente</button>
+                <button id="fail-back-to-hub-btn" class="secondary">Voltar ao Hub</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="instructions-modal" class="modal-overlay">
+        <div class="modal-content glass-card instructions-card">
+            <h3 id="instructions-title">Instruções do Desafio</h3>
+            <div id="instructions-how-to" class="how-to-play"></div>
+            <div id="instructions-why" class="why-its-important"></div>
+            <button id="start-challenge-btn">Começar!</button>
         </div>
     </div>
 
-    <!-- Modal instruções -->
-    <div id="instructions-modal" class="modal hidden">
-        <div class="modal-content">
-            <h2>Instruções</h2>
-            <p>Aponte a câmera para o QR Code da estação.</p>
-            <button id="instructions-close-btn">Fechar</button>
-        </div>
-    </div>
-
-    <!-- Modal tutorial -->
-    <div id="tutorial-overlay" class="hidden">
-        <div id="tutorial-highlight"></div>
-        <div id="tutorial-modal">
+    <div id="tutorial-overlay"></div>
+    <div id="tutorial-modal" class="glass-card">
+        <div id="tutorial-content">
+            <h3 id="tutorial-title"></h3>
             <p id="tutorial-text"></p>
-            <button id="tutorial-next-btn">Próximo</button>
         </div>
-    </div>
-
-    <!-- Conquistas -->
-    <div id="achievements-screen" class="screen hidden">
-        <div class="content">
-            <h2>Conquistas</h2>
-            <div id="achievements-list"></div>
-            <button id="achievements-back-btn">Voltar</button>
-        </div>
+        <button id="tutorial-next-btn">Próximo</button>
     </div>
 
     <script src="script.js"></script>

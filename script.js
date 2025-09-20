@@ -928,18 +928,13 @@ function startQrScanner(final = false) {
     const onScanSuccess = (decodedText) => {
         if (!html5QrCode || !html5QrCode.isScanning) return;
         if (final) {
-            try {
-                new URL(decodedText); 
-                scannerMessage.textContent = "URL Válida! Redirecionando...";
-                qrReaderElement.classList.add('success');
-                window.location.href = decodedText;
-                html5QrCode.stop();
-            } catch (_) {
-                scannerMessage.textContent = "QR Code inválido. Aponte para o QR Code do formulário.";
-                qrReaderElement.classList.add('error');
-                setTimeout(() => qrReaderElement.classList.remove('error'), 2000);
-            }
-        } else {
+    scannerMessage.textContent = "Código lido! Redirecionando para o registro...";
+    qrReaderElement.classList.add('success');
+    html5QrCode.stop().then(() => {
+        window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSddlA2fxZhaFPwWbc3IYPZ3PVaIqHWSSTmiVduuPn4tQDb4Kw/viewform?usp=header";
+    });
+    return; // Adicionado para garantir que o código não continue executando
+} else {
             const expectedQrValue = STATIONS[gameState.stationToUnlock].qrValue;
             if (decodedText === expectedQrValue) {
                 scannerMessage.textContent = "Código correto! Desbloqueando...";
